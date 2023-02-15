@@ -1,0 +1,529 @@
+% -*- coding: utf-8 -*-
+\documentclass[11pt]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{fixltx2e}
+\usepackage{graphicx}
+\usepackage{longtable}
+\usepackage{float}
+\usepackage{wrapfig}
+\usepackage{soul}
+\usepackage{t1enc}
+\usepackage{textcomp}
+\usepackage{marvosym}
+\usepackage{wasysym}
+\usepackage{latexsym}
+\usepackage{amssymb}
+\usepackage{hyperref}
+\tolerance=1000 
+\usepackage{color}
+\usepackage{listings}
+\usepackage[bottom=2cm]{geometry}
+\hypersetup{colorlinks,pdffitwindow,linkcolor=blue}
+\definecolor{lbcolor}{rgb}{0.95,0.95,0.95}\definecolor{cblue}{rgb}{0.,0.0,0.6}\definecolor{lblue}{rgb}{0.1,0.1,0.4}
+\lstset{language=C++,showspaces=false,showstringspaces=false,captionpos=t,literate={>>}{\ensuremath{>>}}1,mathescape}
+\lstset{basicstyle=\small\ttfamily}
+\lstset{lineskip=-2pt}
+\lstset{keywordstyle=\color{red}\bfseries}
+\lstset{emph={inline},emphstyle=\color{red}\bfseries}
+\lstset{commentstyle=\ttfamily\color{cblue}}
+\lstset{backgroundcolor=\color{lbcolor},rulecolor=}
+\lstset{frame=single,framerule=0.5pt}
+\lstset{belowskip=\smallskipamount}
+\lstset{aboveskip=\smallskipamount}
+\providecommand{\alert}[1]{\textbf{#1}}
+
+\title{Report on Lab 2 of SDTM \\
+ By\\
+  
+  \textbf{}}
+\author{AMAKOR Augustina Chidinma and KARIMI Soufiane}
+\date{October 19th}
+
+
+\begin{document}
+
+\maketitle
+\setcounter{tocdepth}{2}
+\tableofcontents
+\vspace*{1cm}
+
+\setcounter{tocdepth}{2}
+\vspace*{1cm}
+
+
+
+
+\section{Create Project}
+
+We started our project by creating a directory in the \texttt{HOME} Directory named \texttt{Lab2}, and we also created a \texttt{CMakelists.txt} as shown below:\\
+
+\begin{lstlisting}[language={sh}]
+(base)karimi@MacBook-Pro-de-Karimi% mkdir Lab2
+(base)karimi@MacBook-Pro-de-Karimi% cd Lab2
+(base)karimi@MacBook-Pro-de-Karimi% cat > CMakeLists.txt
+\end{lstlisting}
+In the \texttt{CMakelists.txt}, we included the below codes:
+\begin{lstlisting}[language={sh}]
+cmake_minimum_required(VERSION 2.8.11)
+set(CMAKE_BUILD_TYPE Release)
+project(Lab2)
+\end{lstlisting}
+
+The file at the root makes sure that the version of \texttt{cmake} is currently recent(2.8.11), defines the name of the project and indicates to compile in release mode.
+Then we compiled by \texttt{cmake .} then \texttt{make}
+
+\section{Installation of Eigen}
+We untared the \texttt{eigen-3.4.0.tar} and add it to our project directory \texttt{Lab2}. Then we included it into the \texttt{CMakelists.txt} as an external one as shown below:\\
+
+\begin{lstlisting}[language={sh}]
+include(ExternalProject)
+ExternalProject_Add(
+Eigen
+SOURCE_DIR SOURCE_DIR $\textrm{\$}${Lab2_SOURCE_DIR}/eigen-3.4.0
+INSTALL_COMMAND echo "Skipping install")
+\end{lstlisting}
+
+We compiled the above using \texttt{make} and the eigen library was installed successfully.
+
+
+\section{Eigen Library}
+We then add the eigen directory using the code below to the \texttt{CMakelists.txt}:
+
+\begin{lstlisting}[language={sh}]
+INCLUDE_DIRECTORIES($\textrm{\$}${Lab2_SOURCE_DIR}/eigen-3.4.0)
+\end{lstlisting}
+
+\section{Quick Test}
+We created a subdirectory \texttt{tests} where we added some tests \texttt{test1.cpp} and \texttt{test2.cpp}  to check Eigen Library. For this, we updated the main \texttt{CMakelists.txt} in the \texttt{Lab2} directory by adding;
+\begin{lstlisting}[language={sh}]
+add_subdirectory(tests)
+\end{lstlisting}
+\vspace{5mm}
+Also, we create a \texttt{CMakelists.txt} in the subdirectory \texttt{tests}  as shown below:
+\begin{lstlisting}[language={sh}]
+add_executable(test1 test1.cpp)
+add_executable(test2 test2.cpp)
+enable_testing()
+add_test(NAME Test1 COMMAND test1)
+add_test(NAME Test2 COMMAND test2)
+\end{lstlisting}
+Then we compiled our tests with \texttt{make} respectively as shown below:\\
+\texttt{test1.cpp} 
+\begin{lstlisting}[language=c++]
+#include <iostream>
+#include <Eigen/Dense>
+ 
+using Eigen::MatrixXd;
+ 
+int main()
+{
+  MatrixXd m(2,2);
+  m(0,0) = 3;
+  m(1,0) = 2.5;
+  m(0,1) = -1;
+  m(1,1) = m(1,0) + m(0,1);
+  std::cout << m*m << std::endl;
+}
+\end{lstlisting}
+Output:\texttt{./test1}
+\begin{lstlisting}[language={sh}]
+ 6.5  -4.5
+11.25 -0.25
+\end{lstlisting}
+\texttt{test2.cpp} 
+\begin{lstlisting}[language=c++]
+#include <iostream>
+#include <Eigen/Dense>
+ 
+using Eigen::MatrixXd;
+ 
+int main()
+{
+  VectorXd v(2);
+  v(0) = 4;
+  v(1) = v(0) - 1;
+  std::cout << v << std::endl;
+}
+\end{lstlisting}
+Output:\texttt{./test2}
+\begin{lstlisting}[language={sh}]
+4
+3
+\end{lstlisting}
+Our Eigen Library was successfully imported since we had no error.\\
+
+\section{Testing Performance of Eigen with Time}
+Here we created new tests of Matrix by Matrix multiplication of size(10,100,1000) and Matrix by vector multiplication of size(10,100,1000) to test the performance of the eigen. Also, we created a benchmark \texttt{header.cpp} that contains the \texttt{include directives} for easy inclusion into our tests as shown below;\\
+\vspace{5mm}
+\texttt{./tests/header.cpp} 
+\begin{lstlisting}[language=c++]
+#include <iostream>
+#include <Eigen/Dense>
+# include <boost/timer/timer.hpp>
+using namespace Eigen ;
+using namespace boost :: timer ;
+\end{lstlisting}
+\vspace{5mm}
+\texttt{./tests/test\char`_timer1.cpp}\\
+Initialise a matrix $A$ of size($n$,$n$) where $n$ $\in$ ($10$,$100$,$1000$), do the multiplication $A*A$, and return the time compilation for each size.
+\begin{lstlisting}[language=c++]
+#include header.cpp
+MatrixXd multiplication_matrix(int size){
+  MatrixXd A(size,size);
+  for (int row = 0; row <size; ++row){
+   for (int col = 0; col <size; ++col)
+    {
+     A(row,col) = row+col;
+    }
+  }
+  return A*A;
+}
+int main()
+{
+  cpu_timer timer;
+  std::cout << "Here is A*A:\n" << multiplication_matrix(10)
+  <<std::endl;
+  cpu_times times10 = timer.elapsed();
+  timer.start();
+  std::cout << "Here is A*A:\n" << multiplication_matrix(100)
+  << std::endl;
+  cpu_times times100 = timer.elapsed();
+  timer.start();  
+  std::cout << "Here is A*A:\n" << multiplication_matrix(1000) 
+  << std::endl;
+  cpu_times times1000 = timer.elapsed();
+  std::cout <<"wall time by size:10,100,1000 : "<<times10.wall<<","
+  <<times100.wall<<","<<times1000.wall<<'\n';
+  std::cout <<"system time by size:10,100,1000 : "<<times10.system
+  <<","<<times100.system<<","<<times1000.system<<'\n';
+  std::cout <<"user time by size:10,100,1000 : "<<times10.user
+  <<","<<times100.user<<","<<times1000.user<<'\n'; 
+}
+\end{lstlisting}
+\vspace{5mm}
+\texttt{./tests/test\char`_timer2.cpp} \\
+Initialise a matrix $A$ of size($n$,$n$) and a vector $V$ of size $n$ where $n$ $\in$ ($10$,$100$,$1000$), do the multiplication $A*v$, and return the time compilation for each size.
+\begin{lstlisting}[language=c++]
+#include header.cpp
+VectorXd multiplication_matrix_vector(int size){
+  MatrixXd A(size,size);
+  for (int row = 0; row <size; ++row){
+   for (int col = 0; col <size; ++col)
+    {
+     A(row,col) = row+col;
+    }
+  }
+  VectorXd v(size);
+  for (int row = 0; row <size; ++row){
+       v(row) = row;
+  }
+  return A*v;
+}
+int main()
+{
+  cpu_timer timer;
+  std::cout << "Here is A*v:\n" << multiplication_matrix_vector(10)
+  << std::endl;
+  cpu_times times10 = timer.elapsed();
+  timer.start();
+  std::cout << "Here is A*v:\n" << multiplication_matrix_vector(100)
+  << std::endl;
+  cpu_times times100 = timer.elapsed();
+  timer.start();  
+  std::cout << "Here is A*v:\n" << multiplication_matrix_vector(1000)
+  << std::endl;\vspace{5mm}
+  cpu_times times1000 = timer.elapsed();
+  std::cout <<"wall time by size:10,100,1000 : "<<times10.wall<<","
+  <<times100.wall<<","<<times1000.wall<<'\n';
+  std::cout <<"system time by size:10,100,1000 : "<<times10.system
+  <<","<<times100.system<<","<<times1000.system<<'\n';
+  std::cout <<"user time by size:10,100,1000 : "<<times10.user
+  <<","<<times100.user<<","<<times1000.user<<'\n'; 
+}
+\end{lstlisting}
+\vspace{5mm}
+Here, we tested the performance (time complexity)  of all our eigen tests using (\texttt{Boost.Timer}). To do this, we included all the \texttt{system and timer} components of the Boost for the individual tests into the \texttt{CMakelists.txt} of the  \texttt{tests} directory as shown below: 
+
+\begin{lstlisting}[language={sh}]
+set(Boost_USE_STATIC_LIBS ON)
+find_package(Boost COMPONENTS system timer unit_test_framework REQUIRED)
+add_executable(test_timer1 test_timer1.cpp)
+add_executable(test_timer2 test_timer2.cpp)
+
+target_link_libraries(test_timer1
+        $\textrm{\$}${Boost_LIBRARIES}
+        $\textrm{\$}${Boost_UNIT_TEST_FRAMEWORK_LIBRARY}
+        $\textrm{\$}${Boost_TIMER_LIBRARY}
+        $\textrm{\$}${Boost_SYSTEM_LIBRARY})
+target_link_libraries(test_timer2
+        $\textrm{\$}${Boost_LIBRARIES}
+        $\textrm{\$}${Boost_UNIT_TEST_FRAMEWORK_LIBRARY}
+        $\textrm{\$}${Boost_TIMER_LIBRARY}
+        $\textrm{\$}${Boost_SYSTEM_LIBRARY})
+enable_testing()
+add_test(test_timer1 test_timer1)
+add_test(test_timer2 test_timer2)
+\end{lstlisting}
+
+We compile then our tests by \texttt{make} and we get the outputs shown below:\\
+\texttt{./test\char`_timer1}
+\begin{lstlisting}[language={sh}]
+wall time by size:10,100,1000 : 308039,18446740,1058655227
+system time by size:10,100,1000 : 0,0,50000000
+user time by size:10,100,1000 : 0,10000000,920000000
+\end{lstlisting}
+\texttt{./test\char`_timer2}
+\begin{lstlisting}[language={sh}]
+wall time by size:10,100,1000 : 184896,452254,11537544
+system time by size:10,100,1000 : 0,0,0
+user time by size:10,100,1000 : 0,0,10000000
+\end{lstlisting}
+
+We remark that the time compilation increases in size.
+
+\section{Optimization of codes using flags}
+We compared our previous time of code compilation by updating the \texttt{CMakelists.txt} in the main directory with \begin{lstlisting}[language={sh}]
+set(CMAKE_CXX_FLAGS "-g")
+\end{lstlisting} using test1 results with the following flags\\
+\texttt{-g}
+\begin{lstlisting}[language={sh}]
+wall time by size:10,100,1000 : 491531,21054504,1033193165
+system time by size:10,100,1000 : 0,0,50000000
+user time by size:10,100,1000 : 0,10000000,910000000
+\end{lstlisting}
+\vspace{5mm}
+\texttt{-O2}
+\begin{lstlisting}[language={sh}]
+wall time by size:10,100,1000 : 555540,19407981,1034552431
+system time by size:10,100,1000 : 0,0,50000000
+user time by size:10,100,1000 : 0,10000000,920000000
+\end{lstlisting}
+\vspace{5mm}
+\texttt{-O3}
+\begin{lstlisting}[language={sh}]
+wall time by size:10,100,1000 : 201318,13564393,1033549776
+system time by size:10,100,1000 : 0,0,50000000
+user time by size:10,100,1000 : 0,10000000,910000000
+\end{lstlisting}
+\vspace{5mm}
+\texttt{-O2 -msse2}
+\begin{lstlisting}[language={sh}]
+wall time by size:10,100,1000 : 194555,12009848,1026738239
+system time by size:10,100,1000 : 0,0,50000000
+user time by size:10,100,1000 : 0,10000000,900000000
+\end{lstlisting}
+\vspace{5mm}
+\texttt{-O3 -msse2}
+\begin{lstlisting}[language={sh}]
+wall time by size:10,100,1000 : 213191,12832374,1030161815
+system time by size:10,100,1000 : 0,0,50000000
+user time by size:10,100,1000 : 0,10000000,900000000
+\end{lstlisting}
+Using the flags, we observed that \texttt{-O2 -msse2} and \texttt{-O3 -msse2} are equivalent, so is also \texttt{-O2} and \texttt{-O3}. \texttt{-g} performs better than the two former but the best to optimize for code size and execution time is \texttt{-O2 -msse2}.
+
+\section{Comparing Eigen and Boost.ublas by Time Compilation}
+Using this time \texttt{Boost.ublas}, we created new tests of Matrix by Matrix multiplication of size(10,100,1000) and Matrix by vector multiplication of size(10,100,1000) to test the performance of the ublas.\\
+Also, we created a benchmark \texttt{header2.cpp} that contains the \texttt{include directives} for easy inclusion into our tests as shown below;\\
+\texttt{./tests/header2.cpp}
+\begin{lstlisting}[language=c++]
+#include <boost/timer/timer.hpp>
+#include <boost/numeric/ublas/matrix.hpp>
+#include <boost/numeric/ublas/io.hpp>
+using namespace boost::timer;
+using namespace boost::numeric::ublas;
+\end{lstlisting}
+\vspace{5mm}
+\texttt{./tests/test\char`_ublas1.cpp}\\
+Initialise a matrix $A$ of size($n$,$n$) where $n$ $\in$ ($10$,$100$,$1000$), do the multiplication $A*A$, and return the time compilation for each\vspace{5mm} size.\\
+\begin{lstlisting}[language=c++]
+#include header2.cpp
+matrix<double> multiplication_matrix(int size){
+  matrix<double> A(size,size);
+  for (int row = 0; row <size; ++row){
+   for (int col = 0; col <size; ++col)
+    {
+     A(row,col) = row+col;
+    }
+  }
+  return prod(A,A);
+}
+int main()
+{
+  cpu_timer timer;
+  std::cout << "Here is A*A:\n" << multiplication_matrix(10)
+  <<std::endl;
+  cpu_times times10 = timer.elapsed();
+  timer.start();
+  std::cout << "Here is A*A:\n" << multiplication_matrix(100)
+  << std::endl;
+  cpu_times times100 = timer.elapsed();
+  timer.start();  
+  std::cout << "Here is A*A:\n" << multiplication_matrix(1000) 
+  << std::endl;
+  cpu_times times1000 = timer.elapsed();
+  std::cout <<"wall time by size:10,100,1000 : "<<times10.wall<<","
+  <<times100.wall<<","<<times1000.wall<<'\n';
+  std::cout <<"system time by size:10,100,1000 : "<<times10.system
+  <<","<<times100.system<<","<<times1000.system<<'\n';
+  std::cout <<"user time by size:10,100,1000 : "<<times10.user
+  <<","<<times100.user<<","<<times1000.user<<'\n'; 
+}
+\end{lstlisting}
+\vspace{5mm}
+\texttt{./tests/test\char`_ublas2.cpp} \\
+Initialise a matrix $A$ of size($n$,$n$) and a vector $V$ of size $n$ where $n$ $\in$ ($10$,$100$,$1000$), do the multiplication $A*v$, and return the time compilation for each size.\\
+\begin{lstlisting}[language=c++]
+#include header2.cpp
+vector<double> multiplication_matrix_vector(int size){
+  matrix<double> A(size,size);
+  for (int row = 0; row <size; ++row){
+   for (int col = 0; col <size; ++col)
+    {
+     A(row,col) = row+col;
+    }
+  }
+  vector<double> v(size);
+  for (int row = 0; row <size; ++row){
+       v(row) = row;
+  }
+  return prod(A,v);
+}
+int main()
+{
+  cpu_timer timer;
+  std::cout << "Here is A*v:\n" << multiplication_matrix_vector(10)
+  << std::endl;
+  cpu_times times10 = timer.elapsed();
+  timer.start();
+  std::cout << "Here is A*v:\n" << multiplication_matrix_vector(100)
+  << std::endl;
+  cpu_times times100 = timer.elapsed();
+  timer.start();  
+  std::cout << "Here is A*v:\n" << multiplication_matrix_vector(1000)
+  << std::endl;
+  cpu_times times1000 = timer.elapsed();
+  std::cout <<"wall time by size:10,100,1000 : "<<times10.wall<<","
+  <<times100.wall<<","<<times1000.wall<<'\n';
+  std::cout <<"system time by size:10,100,1000 : "<<times10.system
+  <<","<<times100.system<<","<<times1000.system<<'\n';
+  std::cout <<"user time by size:10,100,1000 : "<<times10.user
+  <<","<<times100.user<<","<<times1000.user<<'\n'; 
+}
+\end{lstlisting}
+
+\vspace{9mm}
+Here, we tested the performance (time complexity)  of all our ublas tests using (\texttt{Boost}). To do this, we included all the \texttt{system and timer and Boost Libraries} for the individual tests into the \texttt{CMakelists.txt} of the  \texttt{tests} directory as shown below: \\
+
+\begin{lstlisting}[language={sh}]
+set(Boost_USE_STATIC_LIBS ON)
+find_package(Boost COMPONENTS system timer unit_test_framework REQUIRED)
+add_executable(test_timer1 test_timer1.cpp)
+add_executable(test_timer2 test_timer2.cpp)
+add_executable(test_ublas1 test_ublas1.cpp)
+add_executable(test_ublas2 test_ublas2.cpp)
+target_link_libraries(test_timer1
+        $\textrm{\$}${Boost_LIBRARIES}
+        $\textrm{\$}${Boost_UNIT_TEST_FRAMEWORK_LIBRARY}
+        $\textrm{\$}${Boost_TIMER_LIBRARY}
+        $\textrm{\$}${Boost_SYSTEM_LIBRARY})
+target_link_libraries(test_timer2
+        $\textrm{\$}${Boost_LIBRARIES}
+        $\textrm{\$}${Boost_UNIT_TEST_FRAMEWORK_LIBRARY}
+        $\textrm{\$}${Boost_TIMER_LIBRARY}
+        $\textrm{\$}${Boost_SYSTEM_LIBRARY})
+target_link_libraries(test_ublas1
+        $\textrm{\$}${Boost_LIBRARIES}
+        $\textrm{\$}${Boost_TIMER_LIBRARY}
+        $\textrm{\$}${Boost_FILESYSTEM_LIBRARY}
+        $\textrm{\$}${Boost_SYSTEM_LIBRARY}
+        $\textrm{\$}${Boost_UNIT_TEST_FRAMEWORK_LIBRARY}
+                       )
+target_link_libraries(test_ublas2
+        $\textrm{\$}${Boost_LIBRARIES}
+        $\textrm{\$}${Boost_TIMER_LIBRARY}
+        $\textrm{\$}${Boost_FILESYSTEM_LIBRARY}
+        $\textrm{\$}${Boost_SYSTEM_LIBRARY}
+        $\textrm{\$}${Boost_UNIT_TEST_FRAMEWORK_LIBRARY}
+                       )
+enable_testing()
+add_test(test_timer1 test_timer1)
+add_test(test_timer2 test_timer2)
+add_test(test_ublas1 test_ublas1)
+add_test(test_ublas2 test_ublas2)
+\end{lstlisting}
+\vspace{5mm}
+We compiled our tests by \texttt{make} and we got the outputs shown below:\\
+\texttt{./test\char`_ublas1}
+\begin{lstlisting}[language={sh}]
+wall time by size:10,100,1000 : 199058,14802150,1897406463
+system time by size:10,100,1000 : 0,0,60000000
+user time by size:10,100,1000 : 0,0,1580000000
+\end{lstlisting}
+\texttt{./test\char`_ublas2}
+\begin{lstlisting}[language={sh}]
+wall time by size:10,100,1000 : 176577,177500,11335523
+system time by size:10,100,1000 : 0,0,0
+user time by size:10,100,1000 : 0,0,0
+\end{lstlisting}
+we remark that for large size matrix(1000), the compilation using Eigen is faster, which is not true for small sizes(10,100).   
+\section{Processors manipulation}
+
+We execute our tests using 1,2,3,4 processors with the commands below:
+\begin{lstlisting}[language={sh}]
+taskset 0X1 make
+taskset 0X2 make
+taskset 0X3 make
+taskset 0X4 make
+\end{lstlisting}
+ and we observe the following outputs for the test \texttt{test\char`_timer1}:
+\texttt{Using one processor}
+\begin{lstlisting}[language={sh}]
+wall time by size:10,100,1000 : 217583,14074826,2193977452
+system time by size:10,100,1000 : 0,0,30000000
+user time by size:10,100,1000 : 0,10000000,1530000000
+\end{lstlisting}
+\texttt{Using two processors}
+\begin{lstlisting}[language={sh}]
+wall time by size:10,100,1000 : 150798,14689499,2131581800
+system time by size:10,100,1000 : 0,0,40000000
+user time by size:10,100,1000 : 0,10000000,1500000000
+\end{lstlisting}
+\texttt{Using three processors}
+\begin{lstlisting}[language={sh}]
+wall time by size:10,100,1000 : 677481,26196988,2122697280
+system time by size:10,100,1000 : 0,0,70000000
+user time by size:10,100,1000 : 0,10000000,1460000000
+\end{lstlisting}
+\texttt{Using four processors}
+\begin{lstlisting}[language={sh}]
+wall time by size:10,100,1000 : 391060,26761858,2124255717
+system time by size:10,100,1000 : 0,0,90000000
+user time by size:10,100,1000 : 0,10000000,1450000000
+\end{lstlisting}
+
+We remark that the time of compilation decreased when augmenting the number of working processors.
+
+\end{document}
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-PDF-mode: t
+%%% TeX-parse-self: t
+%%% x-symbol-8bits: nil
+%%% TeX-auto-regexp-list: TeX-auto-full-regexp-list
+%%% TeX-master: "tp1.tex"
+%%% ispell-local-dictionary: "american"
+%%% End:
+
+
+
+
+
+
+
+
+
+
+
+
+
